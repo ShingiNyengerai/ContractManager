@@ -44,7 +44,7 @@ public class AmendmentController {
         Contract contract = contractService.findById(contractId);
         
         // Check if user has permission to view this contract's amendments
-        if (contract == null || (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser))) {
+        if (contract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -52,7 +52,7 @@ public class AmendmentController {
         
         model.addAttribute("contract", contract);
         model.addAttribute("amendments", amendments);
-        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.MANAGER);
+        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.CONTRACT_MANAGER);
         
         return "contracts/amendment-management";
     }
@@ -64,7 +64,7 @@ public class AmendmentController {
         Contract contract = contractService.findById(contractId);
         
         // Check if user has permission to add amendments to this contract
-        if (contract == null || (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser))) {
+        if (contract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -86,7 +86,7 @@ public class AmendmentController {
         Contract contract = contractService.findById(contractId);
         
         // Check if user has permission to add amendments to this contract
-        if (contract == null || (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser))) {
+        if (contract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -118,7 +118,7 @@ public class AmendmentController {
         Contract contract = amendment.getContract();
 
         // Check if user has permission to edit this amendment
-        if (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser)) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser)) {
             return "redirect:/contracts/list?error=unauthorized";
         }
 
@@ -153,7 +153,7 @@ public class AmendmentController {
         Contract contract = existingAmendment.getContract();
         
         // Check if user has permission to edit this amendment
-        if (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser)) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser)) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -192,7 +192,7 @@ public class AmendmentController {
         Contract contract = amendment.getContract();
         
         // Only admins can approve amendments
-        if (currentUser.getRole() != User.Role.MANAGER) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -217,7 +217,7 @@ public class AmendmentController {
         Contract contract = amendment.getContract();
         
         // Only admins can reject amendments
-        if (currentUser.getRole() != User.Role.MANAGER) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -243,7 +243,7 @@ public class AmendmentController {
         Long contractId = contract.getId();
         
         // Check if user has permission to delete this amendment
-        if (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser)) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser)) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         

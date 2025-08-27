@@ -51,7 +51,7 @@ public class ContractController {
         List<ContractTemplate> templates;
 
         // Different views based on user role
-        if (currentUser.getRole() == User.Role.MANAGER) {
+        if (currentUser.getRole() == User.Role.CONTRACT_MANAGER) {
             // Admin sees all contracts and templates
             contracts = contractService.findAll();
             templates = contractTemplateService.findAll();
@@ -154,14 +154,14 @@ public class ContractController {
         Contract contract = contractService.findById(id);
 
         // Check if user has permission to edit this contract
-        if (contract == null || (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser))) {
+        if (contract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
 
         model.addAttribute("contract", contract);
         model.addAttribute("contractTypes", contractTypeService.getAllContractTypes());
         model.addAttribute("templates", contractTemplateService.findByActive(true));
-        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.MANAGER);
+        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.CONTRACT_MANAGER);
         model.addAttribute("statusValues", Contract.Status.values());
 
         return "/create";
@@ -180,14 +180,14 @@ public class ContractController {
         Contract existingContract = contractService.findById(id);
 
         // Check if user has permission to edit this contract
-        if (existingContract == null || (currentUser.getRole() != User.Role.MANAGER && !existingContract.getOwner().equals(currentUser))) {
+        if (existingContract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !existingContract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
 
         if (result.hasErrors()) {
             model.addAttribute("contractTypes", contractTypeService.getAllContractTypes());
             model.addAttribute("templates", contractTemplateService.findByActive(true));
-            model.addAttribute("isAdmin", currentUser.getRole() == User.Role.MANAGER);
+            model.addAttribute("isAdmin", currentUser.getRole() == User.Role.CONTRACT_MANAGER);
             model.addAttribute("statusValues", Contract.Status.values());
             // FIXED: Return consistent view path
             return "/create";
@@ -241,7 +241,7 @@ public class ContractController {
 
         List<Contract> contracts;
 
-        if (currentUser.getRole() == User.Role.MANAGER) {
+        if (currentUser.getRole() == User.Role.CONTRACT_MANAGER) {
             contracts = contractService.findAll();
             model.addAttribute("isAdmin", true);
         } else {
@@ -260,7 +260,7 @@ public class ContractController {
 
         List<ContractTemplate> templates;
 
-        if (currentUser.getRole() == User.Role.MANAGER) {
+        if (currentUser.getRole() == User.Role.CONTRACT_MANAGER) {
             templates = contractTemplateService.findAll();
             model.addAttribute("isAdmin", true);
         } else {
@@ -280,12 +280,12 @@ public class ContractController {
         Contract contract = contractService.findById(id);
 
         // Check if user has permission to view this contract
-        if (contract == null || (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser))) {
+        if (contract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
 
         model.addAttribute("contract", contract);
-        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.MANAGER);
+        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.CONTRACT_MANAGER);
         return "contracts/view";
     }
 
@@ -296,18 +296,18 @@ public class ContractController {
         ContractTemplate template = contractTemplateService.findById(id);
 
         // Check if user has permission to view this template
-        if (template == null || (!template.isActive() && currentUser.getRole() != User.Role.MANAGER)) {
+        if (template == null || (!template.isActive() && currentUser.getRole() != User.Role.CONTRACT_MANAGER)) {
             return "redirect:/contracts/templates?error=unauthorized";
         }
 
         model.addAttribute("template", template);
-        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.MANAGER);
+        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.CONTRACT_MANAGER);
         return "contracts/template-view";
     }
 
     // Admin-only operations
     @GetMapping("/admin/stats")
-    @PreAuthorize("hasRole('MANAGER')")
+    @PreAuthorize("hasRole('CONTRACT_MANAGER')")
     public String adminStats(Model model) {
         model.addAttribute("contractsByType", contractTypeService.countContractsByType());
         model.addAttribute("templatesByType", contractTypeService.countTemplatesByType());

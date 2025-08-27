@@ -94,6 +94,6 @@ public class User {
     }
     
     public enum Role {
-        USER, MANAGER
+        USER, CONTRACT_MANAGER
     }
 }

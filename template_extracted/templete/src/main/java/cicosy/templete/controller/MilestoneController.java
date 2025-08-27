@@ -45,7 +45,7 @@ public class MilestoneController {
         Contract contract = contractService.findById(contractId);
         
         // Check if user has permission to view this contract's milestones
-        if (contract == null || (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser))) {
+        if (contract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -53,7 +53,7 @@ public class MilestoneController {
         
         model.addAttribute("contract", contract);
         model.addAttribute("milestones", milestones);
-        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.MANAGER);
+        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.CONTRACT_MANAGER);
         model.addAttribute("completionPercentage", milestoneService.calculateCompletionPercentage(contract));
         
         return "contracts/milestone-tracking";
@@ -66,7 +66,7 @@ public class MilestoneController {
         Contract contract = contractService.findById(contractId);
         
         // Check if user has permission to add milestones to this contract
-        if (contract == null || (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser))) {
+        if (contract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -88,7 +88,7 @@ public class MilestoneController {
         Contract contract = contractService.findById(contractId);
         
         // Check if user has permission to add milestones to this contract
-        if (contract == null || (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser))) {
+        if (contract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -117,7 +117,7 @@ public class MilestoneController {
         Contract contract = milestone.getContract();
         
         // Check if user has permission to edit this milestone
-        if (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser)) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser)) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -145,7 +145,7 @@ public class MilestoneController {
         Contract contract = existingMilestone.getContract();
         
         // Check if user has permission to edit this milestone
-        if (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser)) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser)) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -179,7 +179,7 @@ public class MilestoneController {
         Contract contract = milestone.getContract();
         
         // Check if user has permission to complete this milestone
-        if (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser)) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser)) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -202,7 +202,7 @@ public class MilestoneController {
         Contract contract = milestone.getContract();
         
         // Check if user has permission to uncomplete this milestone
-        if (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser)) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser)) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -226,7 +226,7 @@ public class MilestoneController {
         Long contractId = contract.getId();
         
         // Check if user has permission to delete this milestone
-        if (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser)) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser)) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -244,7 +244,7 @@ public class MilestoneController {
         List<ContractMilestone> milestones;
         
         // Different views based on user role
-        if (currentUser.getRole() == User.Role.MANAGER) {
+        if (currentUser.getRole() == User.Role.CONTRACT_MANAGER) {
             // Admin sees all milestones
             milestones = milestoneService.findAll();
             model.addAttribute("isAdmin", true);

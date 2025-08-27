@@ -45,7 +45,7 @@ public class AnalyticsController {
         Map<String, Object> analyticsData = new HashMap<>();
         
         // Different views based on user role
-        if (currentUser.getRole() == User.Role.MANAGER) {
+        if (currentUser.getRole() == User.Role.CONTRACT_MANAGER) {
             // Admin sees analytics for all contracts
             contracts = contractService.findAll();
             model.addAttribute("isAdmin", true);
@@ -95,7 +95,7 @@ public class AnalyticsController {
         Contract contract = contractService.findById(contractId);
         
         // Check if user has permission to view this contract's performance
-        if (contract == null || (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser))) {
+        if (contract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
         
@@ -111,7 +111,7 @@ public class AnalyticsController {
         
         model.addAttribute("contract", contract);
         model.addAttribute("performanceData", performanceData);
-        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.MANAGER);
+        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.CONTRACT_MANAGER);
         
         return "contracts/contract-performance";
     }
@@ -138,7 +138,7 @@ public class AnalyticsController {
         List<Contract> filteredContracts;
         
         // Different views based on user role
-        if (currentUser.getRole() == User.Role.MANAGER) {
+        if (currentUser.getRole() == User.Role.CONTRACT_MANAGER) {
             // Admin sees reports for all contracts with filters
             filteredContracts = contractService.findByFilters(startDate, endDate, contractType, contractStatus, null);
             model.addAttribute("isAdmin", true);

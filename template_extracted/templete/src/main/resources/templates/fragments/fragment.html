@@ -315,23 +315,23 @@
     <ul class="sidebar-menu" id="sidebarMenu">
         <li>
             <a class="nav-link nav-item" th:href="@{/contracts/dashboard}" data-page="dashboard"
-               sec:authorize="hasAnyRole('USER','MANAGER')">
+               sec:authorize="hasAnyRole('USER','CONTRACT_MANAGER')">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" th:href="@{/contracts/list}" data-page="list" sec:authorize="hasAnyRole('USER','MANAGER')">
+            <a class="nav-link" th:href="@{/contracts/list}" data-page="list" sec:authorize="hasAnyRole('USER','CONTRACT_MANAGER')">
                 <i class="fas fa-file-contract"></i> Contracts</a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" th:href="@{/contracts/Renew}" data-page="list" sec:authorize="hasAnyRole('USER','MANAGER')">
+            <a class="nav-link" th:href="@{/contracts/Renew}" data-page="list" sec:authorize="hasAnyRole('USER','CONTRACT_MANAGER')">
                 <i class="fas fa-calendar-alt"></i> Renewal Calendar</a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link" th:href="@{/contracts/compliance/monitor}" data-page="list" sec:authorize="hasAnyRole('USER','MANAGER')">
+            <a class="nav-link" th:href="@{/contracts/compliance/monitor}" data-page="list" sec:authorize="hasAnyRole('USER','CONTRACT_MANAGER')">
                 <i class="fas fa-exclamation-triangle"></i> Compliance</a>
         </li>
 

@@ -265,7 +265,7 @@
                                                th:if="${amendment.approvalStatus == T(com.example.contractmanagement.model.ApprovalStatus).PENDING}">
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
-                                            <div class="btn-group" sec:authorize="hasRole('ROLE_MANAGER')" 
+                                            <div class="btn-group" sec:authorize="hasRole('CONTRACT_MANAGER')" 
                                                  th:if="${amendment.approvalStatus == T(com.example.contractmanagement.model.ApprovalStatus).PENDING}">
                                                 <form th:action="@{/contracts/amendments/approve/{id}(id=${amendment.id})}" method="post" class="d-inline">
                                                     <button type="submit" class="btn btn-sm btn-outline-success">

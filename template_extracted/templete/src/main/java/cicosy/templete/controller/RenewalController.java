@@ -43,7 +43,7 @@ public class RenewalController {
 
         List<RenewalNotification> renewals;
 
-        if (currentUser.getRole() == User.Role.MANAGER) {
+        if (currentUser.getRole() == User.Role.CONTRACT_MANAGER) {
             renewals = renewalService.findAll();
             model.addAttribute("isAdmin", true);
         } else {
@@ -74,7 +74,7 @@ public class RenewalController {
         User currentUser = userService.findByUsername(auth.getName());
         Contract contract = contractService.findById(contractId);
 
-        if (contract == null || (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser))) {
+        if (contract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
 
@@ -82,7 +82,7 @@ public class RenewalController {
 
         model.addAttribute("contract", contract);
         model.addAttribute("renewals", renewals);
-        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.MANAGER);
+        model.addAttribute("isAdmin", currentUser.getRole() == User.Role.CONTRACT_MANAGER);
 
         return "contracts/renewal-list";
     }
@@ -93,7 +93,7 @@ public class RenewalController {
         User currentUser = userService.findByUsername(auth.getName());
         Contract contract = contractService.findById(contractId);
 
-        if (contract == null || (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser))) {
+        if (contract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
 
@@ -114,7 +114,7 @@ public class RenewalController {
         User currentUser = userService.findByUsername(auth.getName());
         Contract contract = contractService.findById(contractId);
 
-        if (contract == null || (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser))) {
+        if (contract == null || (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser))) {
             return "redirect:/contracts/list?error=unauthorized";
         }
 
@@ -142,7 +142,7 @@ public class RenewalController {
 
         Contract contract = renewal.getContract();
 
-        if (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser)) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser)) {
             return "redirect:/contracts/list?error=unauthorized";
         }
 
@@ -169,7 +169,7 @@ public class RenewalController {
 
         Contract contract = existingRenewal.getContract();
 
-        if (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser)) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser)) {
             return "redirect:/contracts/list?error=unauthorized";
         }
 
@@ -201,7 +201,7 @@ public class RenewalController {
 
         Contract contract = renewal.getContract();
 
-        if (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser)) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser)) {
             return "redirect:/contracts/list?error=unauthorized";
         }
 
@@ -224,7 +224,7 @@ public class RenewalController {
         Contract contract = renewal.getContract();
         Long contractId = contract.getId();
 
-        if (currentUser.getRole() != User.Role.MANAGER && !contract.getOwner().equals(currentUser)) {
+        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER && !contract.getOwner().equals(currentUser)) {
             return "redirect:/contracts/list?error=unauthorized";
         }
 
