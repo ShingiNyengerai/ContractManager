@@ -2,12 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
-	<title>Contract Authoring Wizard</title>
+	<title>Contract Creation Wizard</title>
 </head>
 <body>
 	<div th:replace="fragments/fragment :: header"></div>
 	<div class="container p-3">
-		<h2>Select a Template to Start</h2>
+		<h2>Contract Creation Wizard</h2>
 		<form th:action="@{/contracts/authoring/start/__TID__}" method="post">
 			<select id="templateId" class="form-control" onchange="updateAction(this.value)">
 				<option th:each="t : ${templates}" th:value="${t.id}" th:text="${t.name}"></option>
