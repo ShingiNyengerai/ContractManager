@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+<body>
+<header th:replace="fragments/fragment :: header"></header>
+<aside th:replace="fragments/fragment :: sidebar"></aside>
+<main class="main-content" id="mainContent">
+	<h2>Step 3: Milestones</h2>
+	<div class="table-container">
+		<table>
+			<thead><tr><th>Title</th><th>Due Date</th><th>Amount</th><th>Completed</th></tr></thead>
+			<tbody>
+				<tr th:each="m : ${milestones}">
+					<td th:text="${m.title}">Title</td>
+					<td th:text="${m.dueDate}">2025-01-01</td>
+					<td th:text="${m.paymentAmount}">0.00</td>
+					<td th:text="${m.completed} ? 'Yes' : 'No'">No</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<h3>Add Milestone</h3>
+	<form th:action="@{/contracts/wizard/milestones/add}" method="post">
+		<input type="hidden" name="contractId" th:value="${contract.id}">
+		<input type="text" name="title" placeholder="Title" required>
+		<input type="date" name="dueDate" required>
+		<input type="number" name="paymentAmount" step="0.01" placeholder="Amount">
+		<button type="submit">Add</button>
+	</form>
+	<form th:action="@{/contracts/wizard/milestones/next}" method="post">
+		<input type="hidden" name="contractId" th:value="${contract.id}">
+		<button type="submit">Next</button>
+	</form>
+</main>
+<footer th:replace="fragments/fragment :: footer"></footer>
+<script th:replace="fragments/fragment :: sidebar-script"></script>
+</body>
+</html>

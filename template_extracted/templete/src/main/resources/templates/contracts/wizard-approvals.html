@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+<body>
+<header th:replace="fragments/fragment :: header"></header>
+<aside th:replace="fragments/fragment :: sidebar"></aside>
+<main class="main-content" id="mainContent">
+	<h2>Step 4: Approvals</h2>
+	<div class="table-container">
+		<table>
+			<thead><tr><th>Name</th><th>Steps</th><th></th></tr></thead>
+			<tbody>
+				<tr th:each="w : ${workflows}">
+					<td th:text="${w.name}">Name</td>
+					<td th:text="${w.numberOfSteps}">0</td>
+					<td>
+						<form th:action="@{/contracts/wizard/approvals/apply}" method="post">
+							<input type="hidden" name="contractId" th:value="${contract.id}">
+							<input type="hidden" name="workflowId" th:value="${w.id}">
+							<button type="submit">Apply</button>
+						</form>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</main>
+<footer th:replace="fragments/fragment :: footer"></footer>
+<script th:replace="fragments/fragment :: sidebar-script"></script>
+</body>
+</html>

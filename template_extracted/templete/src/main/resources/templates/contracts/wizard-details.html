@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+<body>
+<header th:replace="fragments/fragment :: header"></header>
+<aside th:replace="fragments/fragment :: sidebar"></aside>
+<main class="main-content" id="mainContent">
+	<h2>Step 1: Basic Details</h2>
+	<form th:action="@{/contracts/wizard/details}" th:object="${contract}" method="post">
+		<input type="hidden" th:field="*{id}">
+		<label>Title</label>
+		<input type="text" th:field="*{title}" required>
+		<label>Type</label>
+		<select th:field="*{contractType}">
+			<option th:each="t : ${contractTypes}" th:value="${t}" th:text="${t}"></option>
+		</select>
+		<label>Counterparty</label>
+		<input type="text" th:field="*{counterpartyName}" required>
+		<label>Start Date</label>
+		<input type="date" th:field="*{startDate}" required>
+		<label>End Date</label>
+		<input type="date" th:field="*{endDate}">
+		<button type="submit">Next</button>
+	</form>
+</main>
+<footer th:replace="fragments/fragment :: footer"></footer>
+<script th:replace="fragments/fragment :: sidebar-script"></script>
+</body>
+</html>
