@@ -1,26 +1,25 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-	<meta charset="UTF-8">
-	<title>Contract Creation Wizard</title>
-</head>
+<head th:replace="fragments/fragment :: head"></head>
 <body>
-	<div th:replace="fragments/fragment :: header"></div>
-	<div class="container p-3">
-		<h2>Contract Creation Wizard</h2>
-		<form th:action="@{/contracts/authoring/start/__TID__}" method="post">
-			<select id="templateId" class="form-control" onchange="updateAction(this.value)">
-				<option th:each="t : ${templates}" th:value="${t.id}" th:text="${t.name}"></option>
-			</select>
-			<button type="submit" class="btn btn-primary mt-2">Start Authoring</button>
-		</form>
-	</div>
-	<script>
-		function updateAction(id){
-			const form = document.querySelector('form');
-			form.action = form.action.replace(/start\/.*/, 'start/' + id);
-		}
-	</script>
-	<div th:replace="fragments/fragment :: footer"></div>
+<header th:replace="fragments/fragment :: header"></header>
+<aside th:replace="fragments/fragment :: sidebar"></aside>
+<main class="main-content" id="mainContent">
+	<h2>Contract Creation Wizard</h2>
+	<form th:action="@{/contracts/authoring/start/__TID__}" method="post">
+		<select id="templateId" onchange="updateAction(this.value)">
+			<option th:each="t : ${templates}" th:value="${t.id}" th:text="${t.name}"></option>
+		</select>
+		<button type="submit">Start</button>
+	</form>
+</main>
+<footer th:replace="fragments/fragment :: footer"></footer>
+<script th:replace="fragments/fragment :: sidebar-script"></script>
+<script>
+function updateAction(id){
+	const form = document.querySelector('form');
+	form.action = form.action.replace(/start\/.*/, 'start/' + id);
+}
+</script>
 </body>
 </html>
