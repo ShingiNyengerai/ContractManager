@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="en">
+<head th:replace="fragments/fragment :: head">
+    <title>Renewal Calendar</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css">
+    <style>
+        /* ✅ Dark green dashboard theme */
+
+        body {
+            background-color: #f4f9f6;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* Calendar toolbar */
+        .fc .fc-toolbar.fc-header-toolbar {
+            background: #025f46;
+            color: #fff;
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+        .fc .fc-button {
+            background: #037b57;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            padding: 6px 12px;
+            transition: background 0.3s ease;
+        }
+        .fc .fc-button:hover {
+            background: #025f46;
+        }
+        .fc .fc-button-primary:not(:disabled).fc-button-active {
+            background: #04a06b;
+            border: none;
+        }
+
+        /* Calendar grid */
+        .fc-theme-standard .fc-scrollgrid {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+
+        /* Events */
+        .fc-event {
+            cursor: pointer;
+            border-radius: 6px;
+            padding: 2px 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .fc-event.sent {
+            background-color: #198754 !important;
+            border-color: #198754 !important;
+        }
+        .fc-event.overdue {
+            background-color: #a83232 !important;
+            border-color: #a83232 !important;
+        }
+        .fc-event.upcoming {
+            background-color: #4dab6a !important;
+            border-color: #4dab6a !important;
+            color: #fff !important;
+        }
+        .fc-event.renewal-date {
+            background-color: #037b57 !important;
+            border-color: #037b57 !important;
+            color: #fff !important;
+        }
+
+        /* Renewal status badges */
+        .renewal-status {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .status-sent {
+            background-color: #c9f2dd;
+            color: #0f5132;
+        }
+        .status-pending {
+            background-color: #e2f0e9;
+            color: #025f46;
+        }
+        .status-overdue {
+            background-color: #f5c2c7;
+            color: #842029;
+        }
+
+        /* Summary cards */
+        .card.bg-info, .card.bg-warning, .card.bg-danger, .card.bg-light {
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        }
+        .card.bg-info { background: #037b57 !important; color: white; }
+        .card.bg-warning { background: #4dab6a !important; color: white; }
+        .card.bg-danger { background: #a83232 !important; color: white; }
+        .card.bg-light { background: #f8f9fa; color: #025f46; }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+
+        <!-- ✅ Sidebar fragment -->
+        <div th:replace="fragments/fragment :: sidebar"></div>
+
+        <!-- ✅ Main content -->
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2 text-success">Renewal Calendar</h1>
+            </div>
+
+            <!-- Renewal Summary -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5>Total Renewals</h5>
+                            <h2 th:text="${renewals != null ? renewals.size() : 0}">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info">
+                        <div class="card-body text-center">
+                            <h5>Sent</h5>
+                            <h2 th:text="${sentCount}">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning">
+                        <div class="card-body text-center">
+                            <h5>Upcoming</h5>
+                            <h2 th:text="${upcomingRenewals != null ? upcomingRenewals.size() : 0}">0</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-danger">
+                        <div class="card-body text-center">
+                            <h5>Overdue</h5>
+                            <h2 th:text="${overdueRenewals != null ? overdueRenewals.size() : 0}">0</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar -->
+            <div id="calendar"></div>
+        </main>
+    </div>
+</div>
+
+<!-- ✅ Footer fragment -->
+<div th:replace="fragments/fragment :: footer"></div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        var renewalEvents = /*[[${renewalEvents != null ? renewalEvents : []}]]*/ [];
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listMonth'
+            },
+            events: renewalEvents
+        });
+        calendar.render();
+    });
+</script>
+</body>
+</html>

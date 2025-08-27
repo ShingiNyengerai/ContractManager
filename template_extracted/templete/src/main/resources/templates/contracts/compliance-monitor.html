@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Monitor - Contract Management System</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <style>
+        .alert-card {
+            border-left: 4px solid #6c757d;
+            margin-bottom: 15px;
+        }
+        .alert-card.resolved {
+            border-left-color: #28a745;
+        }
+        .alert-card.critical {
+            border-left-color: #dc3545;
+        }
+        .alert-card.high {
+            border-left-color: #fd7e14;
+        }
+        .alert-card.medium {
+            border-left-color: #ffc107;
+        }
+        .alert-card.low {
+            border-left-color: #17a2b8;
+        }
+        .alert-status {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+        .status-resolved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-unresolved {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .severity-badge {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+        .severity-critical {
+            background-color: #dc3545;
+            color: white;
+        }
+        .severity-high {
+            background-color: #fd7e14;
+            color: white;
+        }
+        .severity-medium {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .severity-low {
+            background-color: #17a2b8;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div th:replace="fragments/sidebar :: sidebar"></div>
+            
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Compliance Monitor</h1>
+                </div>
+                
+                <!-- Alert Messages -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${success}"></span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                
+                <!-- Compliance Summary -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Alerts</h5>
+                                <h2 class="card-text" th:text="${alerts.size()}">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Resolved</h5>
+                                <h2 class="card-text" th:text="${alerts.stream().filter(a -> a.isResolved()).count()}">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-danger text-white">
+                            <div class="card-body">
+                                <h5 class="card-title">Overdue</h5>
+                                <h2 class="card-text" th:text="${overdueAlerts.size()}">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card bg-warning">
+                            <div class="card-body">
+                                <h5 class="card-title">Critical Alerts</h5>
+                                <h2 class="card-text" th:text="${criticalAlerts.size()}">0</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Compliance Filters -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">Filters</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="filter-form" method="get" th:action="@{/contracts/compliance/monitor}" class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="contractId">Contract</label>
+                                <select class="form-control" id="contractId" name="contractId">
+                                    <option value="">All Contracts</option>
+                                    <option th:each="contract : ${contracts}" 
+                                            th:value="${contract.id}" 
+                                            th:text="${contract.title}" 
+                                            th:selected="${param.contractId != null && param.contractId[0] == contract.id.toString()}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="status">Status</label>
+                                <select class="form-control" id="status" name="status">
+                                    <option value="">All Statuses</option>
+                                    <option value="RESOLVED" th:selected="${param.status != null && param.status[0] == 'RESOLVED'}">Resolved</option>
+                                    <option value="UNRESOLVED" th:selected="${param.status != null && param.status[0] == 'UNRESOLVED'}">Unresolved</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="severity">Severity</label>
+                                <select class="form-control" id="severity" name="severity">
+                                    <option value="">All Severities</option>
+                                    <option value="CRITICAL" th:selected="${param.severity != null && param.severity[0] == 'CRITICAL'}">Critical</option>
+                                    <option value="HIGH" th:selected="${param.severity != null && param.severity[0] == 'HIGH'}">High</option>
+                                    <option value="MEDIUM" th:selected="${param.severity != null && param.severity[0] == 'MEDIUM'}">Medium</option>
+                                    <option value="LOW" th:selected="${param.severity != null && param.severity[0] == 'LOW'}">Low</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="dueDateEnd">Due Date Before</label>
+                                <input type="date" class="form-control" id="dueDateEnd" name="dueDateEnd" th:value="${param.dueDateEnd}">
+                            </div>
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-filter"></i> Apply Filters
+                                </button>
+                                <a th:href="@{/contracts/compliance/monitor}" class="btn btn-secondary">
+                                    <i class="fas fa-sync"></i> Reset
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Critical Alerts Section -->
+                <div class="card mb-4" th:if="${!criticalAlerts.empty}">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">Critical Compliance Alerts</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3" th:each="alert : ${criticalAlerts}">
+                                <div class="card alert-card critical">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <h5 class="card-title mb-0" th:text="${alert.title}">Alert Title</h5>
+                                            <span class="severity-badge severity-critical">Critical</span>
+                                        </div>
+                                        <h6 class="card-subtitle mb-2 text-muted">
+                                            <a th:href="@{/contracts/view/{id}(id=${alert.contract.id})}" 
+                                               th:text="${alert.contract.title}">Contract Title</a>
+                                        </h6>
+                                        <p class="card-text" th:text="${alert.description}">Alert description</p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="text-danger" th:if="${alert.dueDate.isBefore(#temporals.createToday())}">
+                                                    <i class="fas fa-exclamation-circle"></i> Overdue: 
+                                                </span>
+                                                <span th:text="${#temporals.format(alert.dueDate, 'dd MMM yyyy')}">Due Date</span>
+                                            </div>
+                                            <div>
+                                                <a th:href="@{/contracts/compliance/edit/{id}(id=${alert.id})}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                                <form th:if="${!alert.resolved}" 
+                                                      th:action="@{/contracts/compliance/resolve/{id}(id=${alert.id})}" 
+                                                      method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-outline-success">
+                                                        <i class="fas fa-check"></i> Resolve
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Compliance Alerts Table -->
+                <div class="card">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">All Compliance Alerts</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Contract</th>
+                                        <th>Description</th>
+                                        <th>Due Date</th>
+                                        <th>Severity</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:if="${alerts.empty}">
+                                        <td colspan="7" class="text-center">No compliance alerts found</td>
+                                    </tr>
+                                    <tr th:each="alert : ${alerts}">
+                                        <td th:text="${alert.title}">Alert Title</td>
+                                        <td>
+                                            <a th:href="@{/contracts/view/{id}(id=${alert.contract.id})}" 
+                                               th:text="${alert.contract.title}">Contract Title</a>
+                                        </td>
+                                        <td th:text="${#strings.abbreviate(alert.description, 50)}">Description</td>
+                                        <td>
+                                            <span class="text-danger" th:if="${alert.dueDate.isBefore(#temporals.createToday()) && !alert.resolved}">
+                                                <i class="fas fa-exclamation-circle"></i>
+                                            </span>
+                                            <span th:text="${#temporals.format(alert.dueDate, 'dd MMM yyyy')}">Due Date</span>
+                                        </td>
+                                        <td>
+                                            <span th:class="${'severity-badge severity-' + alert.severity.toString().toLowerCase()}"
+                                                  th:text="${alert.severity}">Severity</span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${alert.resolved}" class="alert-status status-resolved">Resolved</span>
+                                            <span th:unless="${alert.resolved}" class="alert-status status-unresolved">Unresolved</span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a th:href="@{/contracts/compliance/edit/{id}(id=${alert.id})}" 
+                                                   class="btn btn-outline-primary" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form th:if="${!alert.resolved}" 
+                                                      th:action="@{/contracts/compliance/resolve/{id}(id=${alert.id})}" 
+                                                      method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-outline-success" title="Mark as Resolved">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </form>
+                                                <form th:if="${alert.resolved}" 
+                                                      th:action="@{/contracts/compliance/unresolve/{id}(id=${alert.id})}" 
+                                                      method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-outline-warning" title="Mark as Unresolved">
+                                                        <i class="fas fa-undo"></i>
+                                                    </button>
+                                                </form>
+                                                <form th:action="@{/contracts/compliance/delete/{id}(id=${alert.id})}" 
+                                                      method="post" class="d-inline"
+                                                      onsubmit="return confirm('Are you sure you want to delete this compliance alert?');">
+                                                    <button type="submit" class="btn btn-outline-danger" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head th:replace="~{fragments/fragment :: head}">
+    <title>Contracts List</title>
+</head>
+
+<body>
+
+<!-- Header Fragment -->
+<header th:replace="~{fragments/fragment :: header}"></header>
+
+<!-- Sidebar Fragment -->
+<aside th:replace="~{fragments/fragment :: sidebar}"></aside>
+
+<!-- Main Content -->
+<main class="main-content" id="mainContent">
+    <div class="dashboard-container">
+        <div class="dashboard-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Contracts</h2>
+                <a th:href="@{/contracts/create}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i> New Contract
+                </a>
+
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Owner</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="contract : ${contracts}">
+                                <td th:text="${contract.title}">Contract Title</td>
+                                <td th:text="${contract.contractType}">Type</td>
+                                <td th:text="${#temporals.format(contract.startDate, 'dd-MM-yyyy')}">01-01-2023</td>
+                                <td th:text="${#temporals.format(contract.endDate, 'dd-MM-yyyy')}">31-12-2023</td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${contract.active}">Active</span>
+                                    <span class="badge bg-secondary" th:unless="${contract.active}">Inactive</span>
+                                </td>
+                                <td th:text="${contract.owner.username}">Owner</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a th:href="@{/contracts/view/{id}(id=${contract.id})}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a th:if="${isAdmin or contract.owner.username == #authentication.name}"
+                                           th:href="@{/contracts/edit/{id}(id=${contract.id})}" class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a th:if="${isAdmin}"
+                                           th:href="@{/contracts/delete/{id}(id=${contract.id})}" class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('Are you sure you want to delete this contract?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${contracts.empty}">
+                                <td colspan="7" class="text-center">No contracts found</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer Fragment -->
+<footer th:replace="~{fragments/fragment :: footer}"></footer>
+
+<!-- Sidebar Script Fragment -->
+<script th:replace="~{fragments/fragment :: sidebar-script}"></script>
+
+<!-- Additional CSS for this page -->
+<style>
+    /* Green theme overrides for contracts list */
+    .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-dark);
+        border-color: var(--primary-dark);
+    }
+
+    .btn-outline-primary {
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    .card {
+        border: 1px solid rgba(34, 197, 94, 0.1);
+        box-shadow: var(--box-shadow);
+        border-radius: var(--border-radius);
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    table {
+        border-radius: var(--border-radius);
+        overflow: hidden;
+    }
+
+    thead th {
+        background-color: rgba(34, 197, 94, 0.1);
+        color: var(--gray-800);
+        font-weight: 600;
+        border-bottom: 2px solid var(--primary-light);
+    }
+
+    .badge.bg-success {
+        background-color: rgba(34, 197, 94, 0.15) !important;
+        color: #15803d;
+    }
+
+    .badge.bg-secondary {
+        background-color: rgba(100, 116, 139, 0.15) !important;
+        color: #475569;
+    }
+
+    .btn-group .btn {
+        border-radius: 6px;
+        margin-right: 0.25rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .btn-group {
+            display: flex;
+            flex-wrap: nowrap;
+        }
+
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+
+        .d-flex {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .d-flex h2 {
+            margin-bottom: 0;
+        }
+    }
+</style>
+
+</body>
+</html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${contract.id != null ? 'Edit Contract' : 'Create Contract'}">Create/Edit Contract</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+
+    <!-- Include fragment base styles -->
+    <th:block th:replace="fragments/fragment :: head"></th:block>
+
+    <style>
+        .main-content {
+            background: #f8f9fa !important;
+        }
+
+        .form-control, .form-select {
+            display: block;
+            width: 100%;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #212529;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
+            transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #025f46;
+            outline: 0;
+            box-shadow: 0 0 0 0.25rem rgba(2, 95, 70, 0.25);
+        }
+
+        .form-section {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: 1px solid #e3e6f0;
+        }
+
+        .form-section h4 {
+            color: #025f46;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .template-selector {
+            cursor: pointer;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        .template-selector:hover {
+            border-color: #025f46;
+            box-shadow: 0 2px 8px rgba(2, 95, 70, 0.15);
+        }
+
+        .template-selector.selected {
+            border-color: #025f46;
+            background-color: rgba(2, 95, 70, 0.05);
+        }
+
+        .btn-primary {
+            background-color: #025f46;
+            border-color: #025f46;
+        }
+
+        .btn-primary:hover {
+            background-color: #01472e;
+            border-color: #01472e;
+        }
+
+        .invalid-feedback {
+            display: block;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+
+<header th:replace="fragments/fragment :: header"></header>
+<aside th:replace="fragments/fragment :: sidebar"></aside>
+
+<main class="main-content" id="mainContent">
+    <div class="dashboard-container">
+        <div class="dashboard-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 th:text="${contract.id != null ? 'Edit Contract' : 'Create Contract'}">Create/Edit Contract</h2>
+                <a href="/contracts/list" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Contracts
+                </a>
+            </div>
+
+            <!-- Display error messages -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+                <span th:text="${error}">Error message</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <form th:action="@{${contract.id != null ? '/contracts/update/' + contract.id : '/contracts/create'}}"
+                  method="post"
+                  th:object="${contract}">
+
+                <input type="hidden" th:field="*{id}" th:if="${contract.id != null}">
+                <input type="hidden" name="templateId" id="selectedTemplateId" th:value="${contract.template != null ? contract.template.id : ''}">
+
+                <!-- Basic Information Section -->
+                <div class="form-section">
+                    <h4>Basic Information</h4>
+                    <hr>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="title" class="form-label">Contract Title *</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="title"
+                                   th:field="*{title}"
+                                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''"
+                                   required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
+                                Title error
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="contractType" class="form-label">Contract Type *</label>
+                            <select class="form-select"
+                                    id="contractType"
+                                    th:field="*{contractType}"
+                                    th:classappend="${#fields.hasErrors('contractType')} ? 'is-invalid' : ''"
+                                    required>
+                                <option value="">Select a contract type</option>
+                                <option value="SALES">Sales Agreement</option>
+                                <option value="EMPLOYMENT">Employment Contract</option>
+                                <option value="SERVICE">Service Agreement</option>
+                                <option value="NDA">Non-Disclosure Agreement</option>
+                                <option value="LEASE">Lease Agreement</option>
+                                <option value="OTHER">Other</option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('contractType')}" th:errors="*{contractType}">
+                                Contract type error
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="startDate" class="form-label">Start Date *</label>
+                            <input type="date"
+                                   class="form-control"
+                                   id="startDate"
+                                   th:field="*{startDate}"
+                                   th:classappend="${#fields.hasErrors('startDate')} ? 'is-invalid' : ''"
+                                   required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('startDate')}" th:errors="*{startDate}">
+                                Start date error
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="endDate" class="form-label">End Date</label>
+                            <input type="date"
+                                   class="form-control"
+                                   id="endDate"
+                                   th:field="*{endDate}"
+                                   th:classappend="${#fields.hasErrors('endDate')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('endDate')}" th:errors="*{endDate}">
+                                End date error
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="counterpartyName" class="form-label">Counterparty Name *</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="counterpartyName"
+                                   th:field="*{counterpartyName}"
+                                   th:classappend="${#fields.hasErrors('counterpartyName')} ? 'is-invalid' : ''"
+                                   required>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('counterpartyName')}" th:errors="*{counterpartyName}">
+                                Counterparty name error
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="counterpartyEmail" class="form-label">Counterparty Email</label>
+                            <input type="email"
+                                   class="form-control"
+                                   id="counterpartyEmail"
+                                   th:field="*{counterpartyEmail}"
+                                   th:classappend="${#fields.hasErrors('counterpartyEmail')} ? 'is-invalid' : ''">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('counterpartyEmail')}" th:errors="*{counterpartyEmail}">
+                                Counterparty email error
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="value" class="form-label">Contract Value</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number"
+                                       step="0.01"
+                                       min="0"
+                                       class="form-control"
+                                       id="value"
+                                       th:field="*{value}"
+                                       th:classappend="${#fields.hasErrors('value')} ? 'is-invalid' : ''">
+                            </div>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('value')}" th:errors="*{value}">
+                                Value error
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="status" class="form-label">Status *</label>
+                            <select class="form-select"
+                                    id="status"
+                                    th:field="*{status}"
+                                    th:classappend="${#fields.hasErrors('status')} ? 'is-invalid' : ''"
+                                    required>
+                                <option value="DRAFT">Draft</option>
+                                <option value="PENDING_APPROVAL">Pending Approval</option>
+                                <option value="ACTIVE">Active</option>
+                                <option value="EXPIRED">Expired</option>
+                                <option value="TERMINATED">Terminated</option>
+                            </select>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('status')}" th:errors="*{status}">
+                                Status error
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Template Selection Section (Only for new contracts) -->
+                <div class="form-section" th:if="${templates != null && templates.size() > 0 && contract.id == null}">
+                    <h4>Select Template (Optional)</h4>
+                    <hr>
+                    <p class="text-muted">Selecting a template will pre-fill the contract content and terms.</p>
+
+                    <div class="row">
+                        <div class="col-md-4" th:each="template : ${templates}">
+                            <div class="template-selector" th:data-id="${template.id}" onclick="selectTemplate(this)">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 th:text="${template.name}">Template Name</h5>
+                                    <span class="badge bg-success" th:if="${template.active}">Active</span>
+                                    <span class="badge bg-secondary" th:unless="${template.active}">Inactive</span>
+                                </div>
+                                <p class="text-muted mb-1" th:text="${template.contractType}">Contract Type</p>
+                                <small th:text="${#strings.abbreviate(template.description, 100)}">Description</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contract Content Section -->
+                <div class="form-section">
+                    <h4>Contract Content</h4>
+                    <hr>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Content</label>
+                        <textarea class="form-control summernote"
+                                  id="content"
+                                  th:field="*{content}"
+                                  rows="10"
+                                  th:classappend="${#fields.hasErrors('content')} ? 'is-invalid' : ''"></textarea>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('content')}" th:errors="*{content}">
+                            Content error
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions Section -->
+                <div class="form-section">
+                    <h4>Terms and Conditions</h4>
+                    <hr>
+                    <div class="mb-3">
+                        <label for="termsAndConditions" class="form-label">Terms and Conditions</label>
+                        <textarea class="form-control summernote"
+                                  id="termsAndConditions"
+                                  th:field="*{termsAndConditions}"
+                                  rows="6"
+                                  th:classappend="${#fields.hasErrors('termsAndConditions')} ? 'is-invalid' : ''"></textarea>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('termsAndConditions')}" th:errors="*{termsAndConditions}">
+                            Terms error
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information Section -->
+                <div class="form-section">
+                    <h4>Additional Information</h4>
+                    <hr>
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control"
+                                  id="notes"
+                                  th:field="*{notes}"
+                                  rows="3"
+                                  th:classappend="${#fields.hasErrors('notes')} ? 'is-invalid' : ''"></textarea>
+                        <div class="invalid-feedback" th:if="${#fields.hasErrors('notes')}" th:errors="*{notes}">
+                            Notes error
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="active" th:field="*{active}">
+                        <label class="form-check-label" for="active">Active</label>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex justify-content-between mb-4">
+                    <a href="/contracts/list" class="btn btn-outline-secondary">Cancel</a>
+                    <div>
+                        <button type="submit" name="action" value="save_draft" class="btn btn-outline-primary me-2">
+                            <i class="bi bi-file-earmark"></i> Save as Draft
+                        </button>
+                        <button type="submit" name="action" value="save" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Save Contract
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="fragments/fragment :: footer"></footer>
+<script th:replace="fragments/fragment :: sidebar-script"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize Summernote editors
+        $('.summernote').summernote({
+            height: 300,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            callbacks: {
+                onInit: function() {
+                    // Ensure editor is properly initialized
+                    console.log('Summernote initialized');
+                }
+            }
+        });
+
+        // Form validation
+        $('form').on('submit', function(e) {
+            var isValid = true;
+
+            // Check required fields
+            $('input[required], select[required]').each(function() {
+                if (!$(this).val()) {
+                    isValid = false;
+                    $(this).addClass('is-invalid');
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
+            // Validate email if provided
+            var email = $('#counterpartyEmail').val();
+            if (email && !isValidEmail(email)) {
+                $('#counterpartyEmail').addClass('is-invalid');
+                isValid = false;
+            }
+
+            // Validate dates
+            var startDate = new Date($('#startDate').val());
+            var endDate = new Date($('#endDate').val());
+            if (endDate && startDate && endDate <= startDate) {
+                $('#endDate').addClass('is-invalid');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+                alert('Please correct the errors in the form before submitting.');
+            }
+        });
+
+        // Real-time validation
+        $('input, select, textarea').on('blur change', function() {
+            $(this).removeClass('is-invalid');
+        });
+    });
+
+    function selectTemplate(element) {
+        // Remove selected class from all templates
+        document.querySelectorAll('.template-selector').forEach(el => {
+            el.classList.remove('selected');
+        });
+
+        // Add selected class to clicked template
+        element.classList.add('selected');
+
+        // Set the template ID in the hidden field
+        const templateId = element.getAttribute('data-id');
+        document.getElementById('selectedTemplateId').value = templateId;
+
+        // AJAX call to load template data
+        fetch('/contracts/template-data/' + templateId)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Template not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Pre-fill the form with template data
+                $('#contractType').val(data.contractType).trigger('change');
+
+                // Update Summernote editors with template content
+                if (data.content) {
+                    $('#content').summernote('code', data.content);
+                }
+                if (data.defaultTermsAndConditions) {
+                    $('#termsAndConditions').summernote('code', data.defaultTermsAndConditions);
+                }
+            })
+            .catch(error => {
+                console.error('Error loading template:', error);
+                alert('Error loading template data. Please try again.');
+            });
+    }
+
+    function isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+</script>
+</body>
+</html>
