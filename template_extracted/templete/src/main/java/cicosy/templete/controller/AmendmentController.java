@@ -190,17 +190,35 @@ public class AmendmentController {
         }
         
         Contract contract = amendment.getContract();
-        
-        // Only admins can approve amendments
-        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER) {
-            return "redirect:/contracts/list?error=unauthorized";
+
+        // Enforce current workflow approver
+        if (contract.getApprovalWorkflow() == null) {
+            return "redirect:/contracts/amendments/list/" + contract.getId() + "?error=no_workflow";
         }
-        
-        amendment.setApproved(true);
-        amendment.setApprovedBy(currentUser);
+
+        var workflow = contract.getApprovalWorkflow();
+        var currentApprover = workflow.getApprovers() != null && workflow.getApprovers().size() > workflow.getCurrentStep()
+            ? workflow.getApprovers().get(workflow.getCurrentStep()) : null;
+
+        if (currentApprover == null || !currentApprover.getId().equals(currentUser.getId())) {
+            return "redirect:/contracts/amendments/list/" + contract.getId() + "?error=not_current_approver";
+        }
+
+        // Advance workflow step; only mark approved when workflow completes
+        int next = (workflow.getCurrentStep() == null ? 0 : workflow.getCurrentStep()) + 1;
+        if (workflow.getNumberOfSteps() != null && next >= workflow.getNumberOfSteps()) {
+            workflow.setCurrentStep(workflow.getNumberOfSteps());
+            workflow.setCompleted(true);
+            amendment.setApproved(true);
+            amendment.setApprovedBy(currentUser);
+        } else {
+            workflow.setCurrentStep(next);
+        }
+        contract.setApprovalWorkflow(workflow);
+        contractService.save(contract);
         amendmentService.updateAmendment(amendment);
-        
-        redirectAttributes.addFlashAttribute("success", "Amendment approved successfully");
+
+        redirectAttributes.addFlashAttribute("success", "Approval recorded");
         return "redirect:/contracts/amendments/list/" + contract.getId();
     }
 
@@ -215,17 +233,27 @@ public class AmendmentController {
         }
         
         Contract contract = amendment.getContract();
-        
-        // Only admins can reject amendments
-        if (currentUser.getRole() != User.Role.CONTRACT_MANAGER) {
-            return "redirect:/contracts/list?error=unauthorized";
+
+        // Enforce current workflow approver on rejection, reset workflow
+        if (contract.getApprovalWorkflow() == null) {
+            return "redirect:/contracts/amendments/list/" + contract.getId() + "?error=no_workflow";
         }
-        
+        var workflow = contract.getApprovalWorkflow();
+        var currentApprover = workflow.getApprovers() != null && workflow.getApprovers().size() > workflow.getCurrentStep()
+            ? workflow.getApprovers().get(workflow.getCurrentStep()) : null;
+        if (currentApprover == null || !currentApprover.getId().equals(currentUser.getId())) {
+            return "redirect:/contracts/amendments/list/" + contract.getId() + "?error=not_current_approver";
+        }
+
         amendment.setApproved(false);
         amendment.setApprovedBy(null);
+        workflow.setCurrentStep(0);
+        workflow.setCompleted(false);
+        contract.setApprovalWorkflow(workflow);
+        contractService.save(contract);
         amendmentService.updateAmendment(amendment);
-        
-        redirectAttributes.addFlashAttribute("success", "Amendment rejected successfully");
+
+        redirectAttributes.addFlashAttribute("success", "Rejection recorded and workflow reset");
         return "redirect:/contracts/amendments/list/" + contract.getId();
     }
 
