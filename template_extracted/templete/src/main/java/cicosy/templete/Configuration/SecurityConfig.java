@@ -15,50 +15,52 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
-    private final CustomUserDetailsService userDetailsService;
-    
-    @Autowired
-    public SecurityConfig(CustomUserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
-    }
-    
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-    
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-    
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/", "/home", "/signup", "/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/login").permitAll()
-                .requestMatchers("/contracts/admin/**").hasRole("CONTRACT_MANAGER")
-                .requestMatchers("/admin/**").hasRole("CONTRACT_MANAGER")
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/contracts/dashboard", true)
-                .failureUrl("/login?error=true")
-                .permitAll()
-            )
-            .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout=true")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .permitAll()
-            )
-            .userDetailsService(userDetailsService);
-            
-        return http.build();
-    }
+	
+	private final CustomUserDetailsService userDetailsService;
+	
+	@Autowired
+	public SecurityConfig(CustomUserDetailsService userDetailsService) {
+		this.userDetailsService = userDetailsService;
+	}
+	
+	@Bean
+	public PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+	
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+		return config.getAuthenticationManager();
+	}
+	
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		http
+			.authorizeHttpRequests(authz -> authz
+				.requestMatchers("/", "/home", "/signup", "/css/**", "/js/**", "/images/**").permitAll()
+				.requestMatchers("/login").permitAll()
+				.requestMatchers("/contracts/admin/**").hasRole("CONTRACT_MANAGER")
+				.requestMatchers("/admin/**").hasRole("CONTRACT_MANAGER")
+				.requestMatchers("/contracts/authoring/**").authenticated()
+				.requestMatchers("/contracts/workflows/**").hasRole("CONTRACT_MANAGER")
+				.anyRequest().authenticated()
+			)
+			.formLogin(form -> form
+				.loginPage("/login")
+				.loginProcessingUrl("/login")
+				.defaultSuccessUrl("/contracts/dashboard", true)
+				.failureUrl("/login?error=true")
+				.permitAll()
+			)
+			.logout(logout -> logout
+				.logoutUrl("/logout")
+				.logoutSuccessUrl("/login?logout=true")
+				.invalidateHttpSession(true)
+				.deleteCookies("JSESSIONID")
+				.permitAll()
+			)
+			.userDetailsService(userDetailsService);
+			
+		return http.build();
+	}
 }

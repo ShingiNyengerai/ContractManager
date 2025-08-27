@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Authoring - Clauses</title>
+</head>
+<body>
+	<div th:replace="fragments/fragment :: header"></div>
+	<div class="container p-3">
+		<h2>Clauses</h2>
+		<table class="table">
+			<thead>
+			<tr><th>Title</th><th>Section</th><th>Mandatory</th><th>Actions</th></tr>
+			</thead>
+			<tbody>
+			<tr th:each="c : ${clauses}">
+				<td th:text="${c.title}">Title</td>
+				<td th:text="${c.section}">Section</td>
+				<td><span th:text="${c.mandatory} ? 'Yes' : 'No'"></span></td>
+				<td>
+					<form th:action="@{'/contracts/authoring/' + ${contractId} + '/clauses/' + ${c.id} + '/delete'}" method="post">
+						<button class="btn btn-sm btn-outline-danger" type="submit">Remove</button>
+					</form>
+				</td>
+			</tr>
+			</tbody>
+		</table>
+		<hr>
+		<h3>Add Clause</h3>
+		<form th:action="@{'/contracts/authoring/' + ${contractId} + '/clauses'}" method="post">
+			<input type="text" name="title" placeholder="Title" class="form-control mb-2" required>
+			<textarea name="content" placeholder="Content" class="form-control mb-2" required></textarea>
+			<input type="text" name="section" placeholder="Section" class="form-control mb-2">
+			<label><input type="checkbox" name="mandatory"> Mandatory</label>
+			<button class="btn btn-primary" type="submit">Add</button>
+		</form>
+	</div>
+	<div th:replace="fragments/fragment :: footer"></div>
+</body>
+</html>

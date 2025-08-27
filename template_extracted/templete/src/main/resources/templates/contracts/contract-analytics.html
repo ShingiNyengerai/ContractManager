@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Contract Analytics</title>
+</head>
+<body>
+	<div th:replace="fragments/fragment :: header"></div>
+	<div class="container p-3">
+		<h2>Analytics</h2>
+		<div>
+			<p>Total Contracts: <span th:text="${analyticsData.contractsCount}">0</span></p>
+			<p>Active Contracts: <span th:text="${analyticsData.activeContractsCount}">0</span></p>
+			<p>Expiring (30 days): <span th:text="${#lists.size(analyticsData.expiringContracts)}">0</span></p>
+			<p>Avg Milestone Completion: <span th:text="${analyticsData.averageMilestoneCompletion}">0</span>%</p>
+		</div>
+	</div>
+	<div th:replace="fragments/fragment :: footer"></div>
+</body>
+</html>

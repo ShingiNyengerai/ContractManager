@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Contract Authoring Wizard</title>
+</head>
+<body>
+	<div th:replace="fragments/fragment :: header"></div>
+	<div class="container p-3">
+		<h2>Select a Template to Start</h2>
+		<form th:action="@{/contracts/authoring/start/__TID__}" method="post">
+			<select id="templateId" class="form-control" onchange="updateAction(this.value)">
+				<option th:each="t : ${templates}" th:value="${t.id}" th:text="${t.name}"></option>
+			</select>
+			<button type="submit" class="btn btn-primary mt-2">Start Authoring</button>
+		</form>
+	</div>
+	<script>
+		function updateAction(id){
+			const form = document.querySelector('form');
+			form.action = form.action.replace(/start\/.*/, 'start/' + id);
+		}
+	</script>
+	<div th:replace="fragments/fragment :: footer"></div>
+</body>
+</html>
