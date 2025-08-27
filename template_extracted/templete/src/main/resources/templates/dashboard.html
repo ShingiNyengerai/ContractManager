@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<head th:replace="~{fragments/fragment :: head}"></head>
+
+<style>
+    /* Modern Dark Green Theme */
+    :root {
+        --primary: #1e8449;
+        --primary-dark: #145a32;
+        --primary-darker: #0d3c21;
+        --primary-light: #27ae60;
+        --primary-lighter: #3dd07a;
+        --secondary: #6c757d;
+        --success: #2ecc71;
+        --info: #3498db;
+        --warning: #f39c12;
+        --danger: #e74c3c;
+        --light: #f8f9fa;
+        --dark: #212529;
+        --gray-100: #f8fafc;
+        --gray-200: #e9ecef;
+        --gray-300: #dee2e6;
+        --gray-400: #ced4da;
+        --gray-500: #94a3b8;
+        --gray-600: #64748b;
+        --gray-700: #475569;
+        --gray-800: #334155;
+        --gray-900: #1e293b;
+        --bg-dark: #0f172a;
+        --bg-card: #1a2438;
+        --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        --box-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.2);
+        --border-radius: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    body {
+        font-family: var(--font-family);
+        background-color: var(--bg-dark);
+        color: var(--gray-200);
+        line-height: 1.6;
+        min-height: 100vh;
+    }
+
+    .dashboard-container {
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .dashboard-content {
+        margin-left: 0;
+        transition: var(--transition);
+    }
+
+    /* Page Header */
+    .page-header {
+        margin-bottom: 2rem;
+        padding: 1.5rem 0;
+    }
+
+    .page-header h2 {
+        font-weight: 700;
+        color: white;
+        font-size: 1.8rem;
+        margin: 0;
+        position: relative;
+        display: inline-block;
+    }
+
+    .page-header h2::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 50px;
+        height: 4px;
+        background: var(--primary-light);
+        border-radius: 2px;
+    }
+
+    /* Statistics Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+        background: var(--bg-card);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-light), var(--primary));
+        opacity: 0.8;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--box-shadow-lg);
+        border-color: rgba(61, 208, 122, 0.2);
+    }
+
+    .stat-icon {
+        background: rgba(39, 174, 96, 0.15);
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .stat-icon i {
+        font-size: 1.8rem;
+        color: var(--primary-light);
+    }
+
+    .stat-content h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0;
+        color: white;
+        line-height: 1.2;
+    }
+
+    .stat-content p {
+        margin: 0.3rem 0 0;
+        color: var(--gray-400);
+        font-weight: 500;
+    }
+
+    /* Data Sections */
+    .data-section {
+        background: var(--bg-card);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        transition: var(--transition);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .data-section:hover {
+        box-shadow: var(--box-shadow-lg);
+        border-color: rgba(61, 208, 122, 0.1);
+    }
+
+    .section-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(30, 132, 73, 0.1);
+    }
+
+    .section-title {
+        font-weight: 600;
+        color: white;
+        margin: 0;
+        font-size: 1.1rem;
+    }
+
+    .section-body {
+        padding: 0;
+    }
+
+    /* Tables */
+    .table {
+        margin: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        color: var(--gray-300);
+    }
+
+    .table thead th {
+        background-color: rgba(30, 132, 73, 0.15);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 0.9rem 1.2rem;
+        font-weight: 600;
+        color: var(--gray-300);
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody td {
+        padding: 1rem 1.2rem;
+        vertical-align: middle;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table tbody tr {
+        transition: var(--transition);
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(39, 174, 96, 0.08);
+    }
+
+    /* Badges */
+    .badge {
+        padding: 0.5rem 0.8rem;
+        border-radius: 50px;
+        font-weight: 500;
+        font-size: 0.75rem;
+    }
+
+    .bg-success {
+        background-color: rgba(46, 204, 113, 0.2) !important;
+        color: #2ecc71;
+    }
+
+    .bg-secondary {
+        background-color: rgba(100, 116, 139, 0.2) !important;
+        color: #94a3b8;
+    }
+
+    /* Buttons */
+    .btn {
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        transition: var(--transition);
+    }
+
+    .btn-sm {
+        padding: 0.35rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .btn-outline-primary {
+        border: 1.5px solid var(--primary-light);
+        color: var(--primary-light);
+        background: transparent;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: var(--primary-light);
+        border-color: var(--primary-light);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+        color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem;
+        color: var(--gray-500);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+        color: var(--primary);
+    }
+
+    .empty-state div {
+        font-size: 1.1rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-container {
+            padding: 15px;
+        }
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .stat-card {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.2rem;
+        }
+
+        .stat-icon {
+            margin-right: 0;
+            margin-bottom: 1rem;
+        }
+
+        .page-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .table thead {
+            display: none;
+        }
+
+        .table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--border-radius);
+        }
+
+        .table tbody td {
+            display: block;
+            text-align: right;
+            padding: 0.75rem;
+            position: relative;
+            padding-left: 50%;
+        }
+
+        .table tbody td::before {
+            content: attr(data-label);
+            position: absolute;
+            left: 1rem;
+            width: calc(50% - 1rem);
+            padding-right: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-400);
+        }
+    }
+</style>
+<body>
+
+<!-- ✅ Header -->
+<header th:replace="~{fragments/fragment :: header}"></header>
+
+<!-- ✅ Sidebar -->
+<aside th:replace="~{fragments/fragment :: sidebar}"></aside>
+
+<!-- ✅ Main Content -->
+<main class="main-content" id="mainContent">
+    <div class="dashboard-container">
+        <div class="dashboard-content">
+
+            <div class="page-header">
+                <h2>Contract Management Dashboard</h2>
+            </div>
+
+            <!-- Statistics Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-file-earmark-text"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 th:text="${contractCount ?: 0}">0</h3>
+                        <p>Total Contracts</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-check-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 th:text="${activeContractCount ?: 0}">0</h3>
+                        <p>Active Contracts</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="bi bi-file-earmark-ruled"></i>
+                    </div>
+                    <div class="stat-content">
+                        <h3 th:text="${templates != null ? templates.size() : 0}">0</h3>
+                        <p>Available Templates</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Tables -->
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="data-section">
+                        <div class="section-header">
+                            <h5 class="section-title">Recent Contracts</h5>
+                            <a th:href="@{/contracts/list}" class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                        <div class="section-body">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="contract, contractStat : ${contracts ?: {}}" th:if="${contractStat.index < 5}">
+                                    <td th:text="${contract.title ?: 'N/A'}">Contract Title</td>
+                                    <td th:text="${contract.contractType ?: 'N/A'}">Type</td>
+                                    <td>
+                                        <span class="badge bg-success" th:if="${contract.active}">Active</span>
+                                        <span class="badge bg-secondary" th:unless="${contract.active}">Inactive</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/contracts/view/{id}(id=${contract.id})}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${contracts == null or contracts.empty}">
+                                    <td colspan="4" class="empty-state">
+                                        <i class="bi bi-inbox"></i>
+                                        <div>No contracts found</div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="data-section">
+                        <div class="section-header">
+                            <h5 class="section-title">Available Templates</h5>
+                            <a th:href="@{/contracts/templates}" class="btn btn-sm btn-outline-primary">View All</a>
+                        </div>
+                        <div class="section-body">
+                            <table class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="template, templateStat : ${templates ?: {}}" th:if="${templateStat.index < 5}">
+                                    <td th:text="${template.name ?: 'N/A'}">Template Name</td>
+                                    <td th:text="${template.contractType ?: 'N/A'}">Type</td>
+                                    <td>
+                                        <span class="badge bg-success" th:if="${template.active}">Active</span>
+                                        <span class="badge bg-secondary" th:unless="${template.active}">Inactive</span>
+                                    </td>
+                                    <td>
+                                        <a th:href="@{/contracts/template/{id}(id=${template.id})}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${templates == null or templates.empty}">
+                                    <td colspan="4" class="empty-state">
+                                        <i class="bi bi-file-earmark"></i>
+                                        <div>No templates found</div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- ✅ Footer -->
+<footer th:replace="~{fragments/fragment :: footer}"></footer>
+
+<!-- ✅ Sidebar Script -->
+<script th:replace="~{fragments/fragment :: sidebar-script}"></script>
+
+</body>
+</html>

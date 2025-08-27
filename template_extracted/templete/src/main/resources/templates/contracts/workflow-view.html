@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+<body>
+<header th:replace="fragments/fragment :: header"></header>
+<aside th:replace="fragments/fragment :: sidebar"></aside>
+<main class="main-content" id="mainContent">
+	<h2 th:text="${workflow.name}">Workflow</h2>
+	<div class="table-container">
+		<table>
+			<tbody>
+				<tr><td>Progress</td><td><span th:text="${workflow.currentStep}">0</span>/<span th:text="${workflow.numberOfSteps}">0</span></td></tr>
+				<tr><td>Completed</td><td th:text="${workflow.completed}">false</td></tr>
+			</tbody>
+		</table>
+	</div>
+	<form th:action="@{'/contracts/workflows/' + ${workflow.id} + '/advance'}" method="post">
+		<button type="submit">Advance</button>
+	</form>
+	<form th:action="@{'/contracts/workflows/' + ${workflow.id} + '/reset'}" method="post">
+		<button type="submit">Reset</button>
+	</form>
+</main>
+<footer th:replace="fragments/fragment :: footer"></footer>
+<script th:replace="fragments/fragment :: sidebar-script"></script>
+</body>
+</html>

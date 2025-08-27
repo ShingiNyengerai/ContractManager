@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>Create Contract</title>
+</head>
+<body>
+	<div th:replace="fragments/fragment :: header"></div>
+	<div class="container p-3">
+		<h2>Create Contract</h2>
+		<div class="mb-2">Step <span th:text="${param.step != null ? param.step[0] : 1}">1</span> of 3</div>
+		<form th:action="@{/contracts/create}" method="post" th:object="${contract}">
+			<input type="hidden" name="step" th:value="${param.step != null ? param.step[0] : 1}"/>
+			<!-- existing fields remain here -->
+			<div class="mt-3">
+				<button class="btn btn-secondary" name="action" value="prev" th:if="${param.step != null and #numbers.formatInteger(param.step[0]) > 1}">Previous</button>
+				<button class="btn btn-primary" name="action" value="next" th:if="${param.step == null or #numbers.formatInteger(param.step[0]) < 3}">Next</button>
+				<button class="btn btn-success" name="action" value="save_draft">Save Draft</button>
+				<button class="btn btn-warning" name="action" value="submit">Submit</button>
+			</div>
+		</form>
+	</div>
+	<div th:replace="fragments/fragment :: footer"></div>
+</body>
+</html>

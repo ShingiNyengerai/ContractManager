@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/fragment :: head"></head>
+<body>
+<header th:replace="fragments/fragment :: header"></header>
+<aside th:replace="fragments/fragment :: sidebar"></aside>
+<main class="main-content" id="mainContent">
+	<h2>Analytics</h2>
+	<div class="table-container">
+		<table>
+			<thead><tr><th>Metric</th><th>Value</th></tr></thead>
+			<tbody>
+				<tr><td>Total Contracts</td><td th:text="${analyticsData.contractsCount}">0</td></tr>
+				<tr><td>Active Contracts</td><td th:text="${analyticsData.activeContractsCount}">0</td></tr>
+				<tr><td>Expiring (30 days)</td><td th:text="${#lists.size(analyticsData.expiringContracts)}">0</td></tr>
+				<tr><td>Avg Milestone Completion</td><td th:text="${analyticsData.averageMilestoneCompletion}">0</td></tr>
+			</tbody>
+		</table>
+	</div>
+</main>
+<footer th:replace="fragments/fragment :: footer"></footer>
+<script th:replace="fragments/fragment :: sidebar-script"></script>
+</body>
+</html>
